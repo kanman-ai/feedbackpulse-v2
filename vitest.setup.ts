@@ -5,7 +5,7 @@
  * that should be available across all test files.
  */
 
-import { beforeAll, afterEach } from 'vitest';
+import { beforeAll, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 
 // Automatically cleanup React components after each test
