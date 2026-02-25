@@ -29,7 +29,7 @@ export interface ProjectWithMembers extends ProjectRow {
 export interface ProjectInviteLink {
   token: string
   expires_at: string
-  role: 'viewer' | 'editor' | 'admin'
+  role: 'viewer' | 'editor' | 'owner'
 }
 
 /**

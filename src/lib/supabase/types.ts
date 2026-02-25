@@ -84,14 +84,14 @@ export interface Database {
           id: string
           project_id: string
           user_id: string
-          role: 'member' | 'admin'
+          role: 'viewer' | 'editor' | 'owner'
           created_at: string
         }
         Insert: {
           id?: string
           project_id: string
           user_id: string
-          role?: 'member' | 'admin'
+          role?: 'viewer' | 'editor' | 'owner'
           created_at?: string
         }
         Update: {
