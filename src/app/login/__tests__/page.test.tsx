@@ -9,20 +9,20 @@ import LoginPage from '../page'
 import { useAuth } from '@/contexts/auth-context'
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
+vi.mock('next/navigation', () => ({
+  useRouter: vi.fn(),
   useSearchParams: () => ({
-    get: jest.fn(() => null)
+    get: vi.fn(() => null)
   })
 }))
 
 // Mock auth context
-jest.mock('@/contexts/auth-context', () => ({
-  useAuth: jest.fn()
+vi.mock('@/contexts/auth-context', () => ({
+  useAuth: vi.fn()
 }))
 
-const mockPush = jest.fn()
-const mockSignIn = jest.fn()
+const mockPush = vi.fn()
+const mockSignIn = vi.fn()
 
 /**
  * Default auth context mock for unauthenticated state.
@@ -32,14 +32,14 @@ const defaultAuthContext = {
   session: null,
   loading: false,
   signIn: mockSignIn,
-  signUp: jest.fn(),
-  signOut: jest.fn()
+  signUp: vi.fn(),
+  signOut: vi.fn()
 }
 
 describe('LoginPage', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue({
+    vi.clearAllMocks()
+    ;(useRouter as any).mockReturnValue({
       push: mockPush
     })
     ;(useAuth as jest.Mock).mockReturnValue(defaultAuthContext)

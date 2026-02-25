@@ -7,17 +7,17 @@ import { useAuth, AuthProvider } from '../auth-context'
 import { createClientSupabase } from '@/lib/supabase'
 
 // Mock Supabase client
-jest.mock('@/lib/supabase', () => ({
-  createClientSupabase: jest.fn()
+vi.mock('@/lib/supabase', () => ({
+  createClientSupabase: vi.fn()
 }))
 
 const mockSupabase = {
   auth: {
-    getSession: jest.fn(),
-    onAuthStateChange: jest.fn(),
-    signInWithPassword: jest.fn(),
-    signUp: jest.fn(),
-    signOut: jest.fn()
+    getSession: vi.fn(),
+    onAuthStateChange: vi.fn(),
+    signInWithPassword: vi.fn(),
+    signUp: vi.fn(),
+    signOut: vi.fn()
   }
 }
 
@@ -48,13 +48,13 @@ const TestComponent = () => {
 
 describe('AuthProvider and useAuth', () => {
   beforeEach(() => {
-    jest.clearAllMocks()
-    ;(createClientSupabase as jest.Mock).mockReturnValue(mockSupabase)
+    vi.clearAllMocks()
+    ;(createClientSupabase as any).mockReturnValue(mockSupabase)
     
     // Default mock implementations
     mockSupabase.auth.getSession.mockResolvedValue({ data: { session: null }, error: null })
     mockSupabase.auth.onAuthStateChange.mockReturnValue({
-      data: { subscription: { unsubscribe: jest.fn() } }
+      data: { subscription: { unsubscribe: vi.fn() } }
     })
     mockSupabase.auth.signInWithPassword.mockResolvedValue({ error: null })
     mockSupabase.auth.signUp.mockResolvedValue({ error: null })
@@ -104,7 +104,7 @@ describe('AuthProvider and useAuth', () => {
   })
 
   it('should throw error when useAuth is used outside provider', () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
     
     expect(() => {
       render(<TestComponent />)
@@ -177,7 +177,7 @@ describe('AuthProvider and useAuth', () => {
     let authStateCallback: Function = () => {}
     mockSupabase.auth.onAuthStateChange.mockImplementation((callback) => {
       authStateCallback = callback
-      return { data: { subscription: { unsubscribe: jest.fn() } } }
+      return { data: { subscription: { unsubscribe: vi.fn() } } }
     })
 
     render(

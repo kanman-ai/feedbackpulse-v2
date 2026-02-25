@@ -23,6 +23,24 @@ export function cn(...inputs: ClassValue[]) {
  * @returns True if email format is valid, false otherwise
  */
 export function isValidEmail(email: string): boolean {
+  // Basic type and null checks
+  if (!email || typeof email !== 'string') {
+    return false
+  }
+
+  // Check for invalid patterns that regex might miss
+  if (email.endsWith('.') || email.includes('..') || email.startsWith('.') || 
+      email.includes('@.') || email.includes('.@') || email.includes('@@')) {
+    return false
+  }
+
+  // Ensure domain part has at least one dot (TLD requirement)
+  const atIndex = email.indexOf('@')
+  if (atIndex === -1 || !email.substring(atIndex + 1).includes('.')) {
+    return false
+  }
+
+  // Comprehensive email regex pattern
   const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
   return emailRegex.test(email)
 }

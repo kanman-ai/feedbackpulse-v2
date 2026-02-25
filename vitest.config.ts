@@ -6,6 +6,10 @@ import { defineConfig } from 'vitest/config'
 import { resolve } from 'path'
 
 export default defineConfig({
+  define: {
+    __DEV__: true,
+    'process.env.NODE_ENV': '"development"'
+  },
   test: {
     globals: true,
     environment: 'jsdom',
