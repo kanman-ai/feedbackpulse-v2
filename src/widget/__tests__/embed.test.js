@@ -93,15 +93,16 @@ describe('Embed Script', () => {
       expect(config.widgetUrl).toBe('https://feedbackpulse.com/widget/widget.js')
     })
 
-    it('should return null when project ID is missing', () => {
+    it('should return false when project ID is missing', () => {
       mockScript.dataset = {}
       global.document.currentScript = mockScript
 
-      // Simulate the validation logic
-      const isValid = mockScript.dataset.projectId && mockScript.dataset.projectId.length > 0
+      // Simulate the validation logic from embed.js parseConfig function
+      const dataset = mockScript.dataset;
+      const isValid = !!dataset.projectId; // Convert to boolean
       
       // Simulate the error logging
-      if (!isValid) {
+      if (!dataset.projectId) {
         global.console.error('FeedbackPulse: data-project-id is required')
       }
       
@@ -207,8 +208,8 @@ describe('Embed Script', () => {
       global.window.FeedbackPulseWidget = null
 
       const checkWidget = () => {
-        return global.window.FeedbackPulseWidget && 
-               typeof global.window.FeedbackPulseWidget.init === 'function'
+        return !!(global.window.FeedbackPulseWidget && 
+                 typeof global.window.FeedbackPulseWidget.init === 'function')
       }
 
       expect(checkWidget()).toBe(false)
