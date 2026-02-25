@@ -166,6 +166,56 @@ export interface Database {
           }
         ]
       }
+      feedback: {
+        Row: {
+          id: string
+          project_id: string
+          rating: number
+          comment: string
+          email: string | null
+          source: string
+          submitted_at: string
+          user_agent: string | null
+          ip_address: string | null
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          rating: number
+          comment: string
+          email?: string | null
+          source: string
+          submitted_at?: string
+          user_agent?: string | null
+          ip_address?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          rating?: number
+          comment?: string
+          email?: string | null
+          source?: string
+          submitted_at?: string
+          user_agent?: string | null
+          ip_address?: string | null
+          created_at?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
