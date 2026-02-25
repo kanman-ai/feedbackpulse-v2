@@ -84,6 +84,8 @@ export async function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/auth/') || // Supabase auth endpoints
+    pathname.startsWith('/api/feedback/') || // Public feedback endpoints
+    pathname.startsWith('/feedback/') || // Public feedback pages
     pathname.startsWith('/favicon') ||
     pathname.includes('.') // Static files like .png, .css, etc.
   ) {
