@@ -21,6 +21,8 @@
    * @property {string} projectId - The project ID for this widget instance
    * @property {string} buttonColor - The color of the feedback button
    * @property {string} buttonLabel - The text label for the feedback button
+   * @property {string} position - Position of the widget on page (bottom-right, bottom-left, etc.)
+   * @property {string} theme - Widget theme (light, dark)
    * @property {string} widgetUrl - The URL to load the widget library from
    */
 
@@ -35,9 +37,8 @@
     
     if (!currentScript) {
       console.error('FeedbackPulse: Could not find embed script tag');
-      return false false;
+      return false;
     }
-    return false;
 
     // Extract data attributes
     const dataset = currentScript.dataset;
@@ -52,7 +53,9 @@
       projectId: dataset.projectId,
       buttonColor: dataset.buttonColor || '#007bff',
       buttonLabel: dataset.buttonLabel || 'Feedback',
-      widgetUrl: dataset.widgetUrl || 'https://feedbackpulse.com/widget/widget.js'
+      position: dataset.position || 'bottom-right',
+      theme: dataset.theme || 'light',
+      widgetUrl: dataset.widgetUrl || '/widget/widget.js'
     };
   }
 
@@ -66,7 +69,7 @@
       // Check if widget is already loaded
       if (window.FeedbackPulseWidget) {
         resolve();
-        return false;
+        return;
       }
 
       // Create script element
@@ -94,6 +97,9 @@
    * @param {WidgetConfig} config - The widget configuration
    */
   function initializeWidget(config) {
+    // Store config globally for the widget to access
+    window.feedbackPulseConfig = config;
+    
     // Wait for the widget library to be available
     const maxAttempts = 50; // 5 seconds timeout
     let attempts = 0;
@@ -126,7 +132,7 @@
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initEmbed);
-      return false;
+      return;
     }
 
     try {
