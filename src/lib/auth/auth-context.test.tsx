@@ -20,7 +20,7 @@ function TestComponent() {
       <div data-testid="loading">{loading ? 'loading' : 'loaded'}</div>
       <div data-testid="user">{user?.email || 'no-user'}</div>
       <div data-testid="session">{session?.access_token ? 'has-session' : 'no-session'}</div>
-      <div data-testid="profile">{profile?.full_name || 'no-profile'}</div>
+      <div data-testid="profile">{profile?.display_name || 'no-profile'}</div>
       <button onClick={() => signUp('test@example.com', 'password123')}>signup</button>
       <button onClick={() => signIn('test@example.com', 'password123')}>signin</button>
       <button onClick={signOut}>signout</button>

@@ -1,84 +1,85 @@
 /**
- * Test setup configuration for FeedbackPulse v2.
- * Configures testing environment, mocks, and global test utilities.
+ * Vitest Setup Configuration
+ * 
+ * Sets up the testing environment with necessary polyfills, mocks,
+ * and global configurations for React Testing Library and Vitest.
  */
-import '@testing-library/jest-dom'
-import { vi } from 'vitest'
 
-/**
- * Mock Next.js router for testing navigation components.
- * Provides default implementations for router methods used in tests.
- */
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    prefetch: vi.fn(),
-  }),
-  useSearchParams: () => new URLSearchParams(),
-  usePathname: () => '/',
-}))
+import '@testing-library/jest-dom';
+import { vi, beforeEach } from 'vitest';
 
-/**
- * Mock Supabase client for testing auth functionality.
- * Prevents actual API calls during tests and provides controllable responses.
- */
-vi.mock('@/lib/supabase/client', () => ({
-  supabase: {
-    auth: {
-      getSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-      signUp: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-      signInWithPassword: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-      exchangeCodeForSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-    })),
-  },
-  createClient: vi.fn(() => ({
-    // Same mock implementation as above
-    auth: {
-      getSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-      signUp: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-      signInWithPassword: vi.fn(() => Promise.resolve({ data: {}, error: null })),
-      signOut: vi.fn(() => Promise.resolve({ error: null })),
-      exchangeCodeForSession: vi.fn(() => Promise.resolve({ data: { session: null }, error: null })),
-    },
-    from: vi.fn(() => ({
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      single: vi.fn(() => Promise.resolve({ data: null, error: null })),
-    })),
-  })),
-}))
-
-/**
- * Mock localStorage for testing session persistence.
- * Provides in-memory storage for testing auth state management.
- */
-Object.defineProperty(window, 'localStorage', {
-  value: (() => {
-    let store: Record<string, string> = {}
-    return {
-      getItem: vi.fn((key: string) => store[key] || null),
-      setItem: vi.fn((key: string, value: string) => { store[key] = value }),
-      removeItem: vi.fn((key: string) => { delete store[key] }),
-      clear: vi.fn(() => { store = {} }),
-    }
-  })(),
+// Mock window.matchMedia for responsive design tests
+Object.defineProperty(window, 'matchMedia', {
   writable: true,
-})
+  value: vi.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(), // deprecated
+    removeListener: vi.fn(), // deprecated
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })),
+});
 
-/**
- * Global test timeout for async operations.
- * Prevents tests from hanging on slow network operations.
- */
-vi.setConfig({ testTimeout: 10000 })
+// Mock IntersectionObserver for components that use it
+global.IntersectionObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock ResizeObserver for components that use it
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+  observe: vi.fn(),
+  unobserve: vi.fn(),
+  disconnect: vi.fn(),
+}));
+
+// Mock scroll methods
+Object.defineProperty(window, 'scrollTo', {
+  value: vi.fn(),
+  writable: true,
+});
+
+// Mock localStorage and sessionStorage
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+
+Object.defineProperty(window, 'localStorage', {
+  value: localStorageMock,
+});
+
+Object.defineProperty(window, 'sessionStorage', {
+  value: localStorageMock,
+});
+
+// Mock fetch for API calls
+global.fetch = vi.fn();
+
+// Set up console.error to fail tests when React errors occur
+const originalError = console.error;
+console.error = (...args) => {
+  // Fail tests on React errors and warnings
+  if (
+    typeof args[0] === 'string' &&
+    (args[0].includes('Warning:') || args[0].includes('Error:'))
+  ) {
+    throw new Error(args[0]);
+  }
+  originalError(...args);
+};
+
+// Clean up after each test
+beforeEach(() => {
+  vi.clearAllMocks();
+  localStorageMock.getItem.mockClear();
+  localStorageMock.setItem.mockClear();
+  localStorageMock.removeItem.mockClear();
+  localStorageMock.clear.mockClear();
+});

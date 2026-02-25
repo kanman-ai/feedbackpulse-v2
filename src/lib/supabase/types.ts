@@ -1,115 +1,170 @@
 /**
- * TypeScript database types for FeedbackPulse v2 Supabase integration.
- * Generated from the database schema contract and provides type safety
- * for all database operations.
+ * TypeScript types for FeedbackPulse v2 Supabase database schema.
+ * These types are generated from the database schema and provide type safety
+ * for all database operations and API responses.
  */
 
-/**
- * Main database interface defining all table schemas and relationships.
- * Used by Supabase client for type-safe queries and mutations.
- */
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export interface Database {
   public: {
     Tables: {
-      /**
-       * User profiles table extending Supabase auth.users
-       * Stores additional user metadata and preferences
-       */
       profiles: {
         Row: {
           id: string
-          email: string
-          full_name: string | null
-          avatar_url: string | null
-          role: 'admin' | 'user'
+          display_name: string | null
           created_at: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           id: string
-          email: string
-          full_name?: string | null
-          avatar_url?: string | null
-          role?: 'admin' | 'user'
+          display_name?: string | null
           created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           id?: string
-          email?: string
-          full_name?: string | null
-          avatar_url?: string | null
-          role?: 'admin' | 'user'
+          display_name?: string | null
           created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
       }
-      /**
-       * Organizations table for multi-tenant support
-       */
-      organizations: {
+      projects: {
         Row: {
           id: string
           name: string
-          slug: string
           description: string | null
-          logo_url: string | null
-          settings: any
+          owner_id: string
           created_at: string
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
           id?: string
           name: string
-          slug: string
           description?: string | null
-          logo_url?: string | null
-          settings?: any
+          owner_id: string
           created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
           id?: string
           name?: string
-          slug?: string
           description?: string | null
-          logo_url?: string | null
-          settings?: any
+          owner_id?: string
           created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "projects_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
-      /**
-       * Organization memberships for user-org relationships
-       */
-      organization_members: {
+      project_members: {
         Row: {
           id: string
+          project_id: string
           user_id: string
-          organization_id: string
-          role: 'owner' | 'admin' | 'member'
-          joined_at: string
+          role: 'member' | 'admin'
           created_at: string
-          updated_at: string
         }
         Insert: {
           id?: string
+          project_id: string
           user_id: string
-          organization_id: string
-          role?: 'owner' | 'admin' | 'member'
-          joined_at?: string
+          role?: 'member' | 'admin'
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
+          project_id?: string
           user_id?: string
-          organization_id?: string
-          role?: 'owner' | 'admin' | 'member'
-          joined_at?: string
+          role?: 'member' | 'admin'
           created_at?: string
-          updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      feedback_sessions: {
+        Row: {
+          id: string
+          project_id: string
+          title: string
+          description: string | null
+          status: 'draft' | 'active' | 'completed'
+          created_by: string
+          created_at: string
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          project_id: string
+          title: string
+          description?: string | null
+          status?: 'draft' | 'active' | 'completed'
+          created_by: string
+          created_at?: string
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          project_id?: string
+          title?: string
+          description?: string | null
+          status?: 'draft' | 'active' | 'completed'
+          created_by?: string
+          created_at?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_sessions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_sessions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -119,23 +174,15 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      user_role: 'admin' | 'user'
-      member_role: 'owner' | 'admin' | 'member'
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
 
-/**
- * User profile data structure for type safety in components
- */
-export type Profile = Database['public']['Tables']['profiles']['Row']
-
-/**
- * Organization data structure for type safety in components  
- */
-export type Organization = Database['public']['Tables']['organizations']['Row']
-
-/**
- * Organization membership data structure for type safety in components
- */
-export type OrganizationMember = Database['public']['Tables']['organization_members']['Row']
+// Export commonly used types for convenience
+export type Profile = Database['public']['Tables']['profiles']['Row'];
+export type Project = Database['public']['Tables']['projects']['Row'];
+export type ProjectMember = Database['public']['Tables']['project_members']['Row'];

@@ -55,9 +55,9 @@ export default function Home() {
             <p className="text-green-600">
               Signed in as: <span className="font-medium">{user.email}</span>
             </p>
-            {profile?.full_name && (
+            {profile?.display_name && (
               <p className="text-green-600">
-                Name: <span className="font-medium">{profile.full_name}</span>
+                Name: <span className="font-medium">{profile.display_name}</span>
               </p>
             )}
           </div>
