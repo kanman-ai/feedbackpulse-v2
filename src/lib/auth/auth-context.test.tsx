@@ -66,6 +66,9 @@ describe('Auth Context Provider', () => {
     it('should handle user session when present', async () => {
       const mockSession = {
         access_token: 'mock-token',
+        refresh_token: 'refresh-123',
+        expires_in: 3600,
+        token_type: 'bearer',
         user: { id: 'user-123', email: 'test@example.com' }
       }
       
@@ -81,7 +84,7 @@ describe('Auth Context Provider', () => {
 
       // Mock Supabase responses
       vi.mocked(supabase.auth.getSession).mockResolvedValue({
-        data: { session: mockSession },
+        data: { session: mockSession as any },
         error: null
       })
       
@@ -101,7 +104,19 @@ describe('Auth Context Provider', () => {
     })
 
     it('should handle signup method correctly', async () => {
-      const mockSignUpResult = { data: {}, error: null }
+      const mockSignUpResult = {
+        data: {
+          user: { id: 'user-123', email: 'test@example.com' } as any,
+          session: {
+            access_token: 'token-123',
+            refresh_token: 'refresh-123',
+            expires_in: 3600,
+            token_type: 'bearer',
+            user: { id: 'user-123', email: 'test@example.com' }
+          } as any
+        },
+        error: null
+      }
       vi.mocked(supabase.auth.signUp).mockResolvedValue(mockSignUpResult)
 
       renderAuthProvider()
@@ -126,7 +141,19 @@ describe('Auth Context Provider', () => {
     })
 
     it('should handle signin method correctly', async () => {
-      const mockSignInResult = { data: {}, error: null }
+      const mockSignInResult = {
+        data: {
+          user: { id: 'user-123', email: 'test@example.com' } as any,
+          session: {
+            access_token: 'token-123',
+            refresh_token: 'refresh-123',
+            expires_in: 3600,
+            token_type: 'bearer',
+            user: { id: 'user-123', email: 'test@example.com' }
+          } as any
+        },
+        error: null
+      }
       vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue(mockSignInResult)
 
       renderAuthProvider()
@@ -169,6 +196,9 @@ describe('Auth Context Provider', () => {
     it('should persist session data to localStorage', async () => {
       const mockSession = {
         access_token: 'mock-token',
+        refresh_token: 'refresh-123',
+        expires_in: 3600,
+        token_type: 'bearer',
         user: { id: 'user-123', email: 'test@example.com' }
       }
       
@@ -183,7 +213,7 @@ describe('Auth Context Provider', () => {
       }
 
       vi.mocked(supabase.auth.getSession).mockResolvedValue({
-        data: { session: mockSession },
+        data: { session: mockSession as any },
         error: null
       })
       

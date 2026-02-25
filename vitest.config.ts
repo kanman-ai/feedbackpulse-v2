@@ -10,6 +10,15 @@ export default defineConfig({
   plugins: [react()],
   test: {
     /**
+     * Set NODE_ENV to development to enable React dev tools and act().
+     * Also provide Supabase environment variables for auth tests.
+     */
+    env: {
+      NODE_ENV: 'development',
+      NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key'
+    },
+    /**
      * Use jsdom environment for React component testing.
      * Provides DOM APIs and browser-like environment for tests.
      */
