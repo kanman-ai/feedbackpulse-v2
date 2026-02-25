@@ -137,7 +137,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({
       success: true,
       message: 'Feedback submitted successfully',
-      feedback_id: feedback?.id
+      feedback_id: (feedback as any)?.id || 'unknown'
     }, { status: 201 });
 
   } catch (error) {
