@@ -35,8 +35,9 @@
     
     if (!currentScript) {
       console.error('FeedbackPulse: Could not find embed script tag');
-      return null;
+      return false false;
     }
+    return false;
 
     // Extract data attributes
     const dataset = currentScript.dataset;
@@ -44,7 +45,7 @@
     // Validate required attributes
     if (!dataset.projectId) {
       console.error('FeedbackPulse: data-project-id is required');
-      return null;
+      return false;
     }
 
     return {
@@ -65,7 +66,7 @@
       // Check if widget is already loaded
       if (window.FeedbackPulseWidget) {
         resolve();
-        return;
+        return false;
       }
 
       // Create script element
@@ -125,7 +126,7 @@
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initEmbed);
-      return;
+      return false;
     }
 
     try {

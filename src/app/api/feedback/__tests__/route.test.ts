@@ -14,8 +14,28 @@ describe('Feedback API Route', () => {
     // Mock console methods
     global.console = {
       error: vi.fn(),
-      log: vi.fn()
-    }
+      log: vi.fn(),
+      assert: vi.fn(),
+      clear: vi.fn(),
+      count: vi.fn(),
+      countReset: vi.fn(),
+      debug: vi.fn(),
+      dir: vi.fn(),
+      dirxml: vi.fn(),
+      group: vi.fn(),
+      groupCollapsed: vi.fn(),
+      groupEnd: vi.fn(),
+      info: vi.fn(),
+      table: vi.fn(),
+      time: vi.fn(),
+      timeEnd: vi.fn(),
+      timeLog: vi.fn(),
+      trace: vi.fn(),
+      warn: vi.fn(),
+      profile: vi.fn(),
+      profileEnd: vi.fn(),
+      timeStamp: vi.fn()
+    } as any
   })
 
   afterEach(() => {
@@ -269,7 +289,7 @@ describe('Feedback API Route', () => {
 
       // Invalid data - missing required field
       const invalidData = { ...validData }
-      delete invalidData.projectId
+      delete (invalidData as any).projectId
 
       expect(validateFeedbackData(invalidData)).toBe(false)
 
