@@ -1,0 +1,347 @@
+{
+  "unit_tests": {
+    "Set up Supabase integration & database schema": [
+      {
+        "title": "should connect to Supabase client",
+        "test_file_path": "src/lib/supabase.test.ts",
+        "test_name": "should connect to Supabase client",
+        "test_suite": "Supabase Client",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should validate environment variables",
+        "test_file_path": "src/lib/supabase.test.ts", 
+        "test_name": "should validate environment variables",
+        "test_suite": "Supabase Client",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should handle connection errors gracefully",
+        "test_file_path": "src/lib/supabase.test.ts",
+        "test_name": "should handle connection errors gracefully", 
+        "test_suite": "Supabase Client",
+        "test_scope": "unit"
+      }
+    ],
+    "Implement Supabase auth flow (signup/login/logout)": [
+      {
+        "title": "should validate email format on signup",
+        "test_file_path": "src/components/Auth/AuthForm.test.tsx",
+        "test_name": "should validate email format on signup",
+        "test_suite": "Auth Form",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should handle authentication errors",
+        "test_file_path": "src/components/Auth/AuthForm.test.tsx",
+        "test_name": "should handle authentication errors",
+        "test_suite": "Auth Form", 
+        "test_scope": "unit"
+      },
+      {
+        "title": "should redirect after successful login",
+        "test_file_path": "src/hooks/useAuth.test.ts",
+        "test_name": "should redirect after successful login",
+        "test_suite": "Auth Hook",
+        "test_scope": "unit"
+      }
+    ],
+    "Build user profile page & settings": [
+      {
+        "title": "should display user information",
+        "test_file_path": "src/components/Profile/ProfilePage.test.tsx",
+        "test_name": "should display user information", 
+        "test_suite": "Profile Page",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should update profile on form submission",
+        "test_file_path": "src/components/Profile/ProfileForm.test.tsx",
+        "test_name": "should update profile on form submission",
+        "test_suite": "Profile Form",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should validate required fields",
+        "test_file_path": "src/components/Profile/ProfileForm.test.tsx", 
+        "test_name": "should validate required fields",
+        "test_suite": "Profile Form",
+        "test_scope": "unit"
+      }
+    ],
+    "Create project management UI (CRUD + team invite)": [
+      {
+        "title": "should create new project",
+        "test_file_path": "src/components/Projects/ProjectForm.test.tsx",
+        "test_name": "should create new project",
+        "test_suite": "Project Form",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should delete project with confirmation",
+        "test_file_path": "src/components/Projects/ProjectList.test.tsx",
+        "test_name": "should delete project with confirmation",
+        "test_suite": "Project List", 
+        "test_scope": "unit"
+      },
+      {
+        "title": "should send team invitations",
+        "test_file_path": "src/components/Projects/TeamInvite.test.tsx",
+        "test_name": "should send team invitations",
+        "test_suite": "Team Invite",
+        "test_scope": "unit"
+      }
+    ],
+    "Build floating widget component (React)": [
+      {
+        "title": "should render widget button",
+        "test_file_path": "src/widget/FloatingWidget.test.tsx",
+        "test_name": "should render widget button",
+        "test_suite": "Floating Widget",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should open modal on button click",
+        "test_file_path": "src/widget/FloatingWidget.test.tsx",
+        "test_name": "should open modal on button click",
+        "test_suite": "Floating Widget",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should apply custom theme colors",
+        "test_file_path": "src/widget/FloatingWidget.test.tsx",
+        "test_name": "should apply custom theme colors",
+        "test_suite": "Floating Widget", 
+        "test_scope": "unit"
+      }
+    ],
+    "Add feedback modal to widget": [
+      {
+        "title": "should display rating stars",
+        "test_file_path": "src/widget/FeedbackModal.test.tsx",
+        "test_name": "should display rating stars",
+        "test_suite": "Feedback Modal",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should validate rating selection",
+        "test_file_path": "src/widget/FeedbackModal.test.tsx",
+        "test_name": "should validate rating selection",
+        "test_suite": "Feedback Modal",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should submit feedback with comment",
+        "test_file_path": "src/widget/FeedbackModal.test.tsx",
+        "test_name": "should submit feedback with comment",
+        "test_suite": "Feedback Modal",
+        "test_scope": "unit"
+      }
+    ],
+    "Create widget script loader": [
+      {
+        "title": "should load widget configuration",
+        "test_file_path": "src/widget/WidgetLoader.test.ts",
+        "test_name": "should load widget configuration",
+        "test_suite": "Widget Loader",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should handle invalid project IDs",
+        "test_file_path": "src/widget/WidgetLoader.test.ts",
+        "test_name": "should handle invalid project IDs",
+        "test_suite": "Widget Loader",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should cleanup on destroy",
+        "test_file_path": "src/widget/WidgetLoader.test.ts",
+        "test_name": "should cleanup on destroy", 
+        "test_suite": "Widget Loader",
+        "test_scope": "unit"
+      }
+    ],
+    "Build widget settings panel (project dashboard)": [
+      {
+        "title": "should update theme color",
+        "test_file_path": "src/components/Dashboard/WidgetSettings.test.tsx",
+        "test_name": "should update theme color",
+        "test_suite": "Widget Settings",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should preview widget changes",
+        "test_file_path": "src/components/Dashboard/WidgetPreview.test.tsx",
+        "test_name": "should preview widget changes",
+        "test_suite": "Widget Preview",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should generate embed code",
+        "test_file_path": "src/components/Dashboard/EmbedCode.test.tsx",
+        "test_name": "should generate embed code",
+        "test_suite": "Embed Code",
+        "test_scope": "unit"
+      }
+    ],
+    "Create feedback API endpoint (POST /api/feedback)": [
+      {
+        "title": "should accept valid feedback submission",
+        "test_file_path": "src/app/api/feedback/route.test.ts",
+        "test_name": "should accept valid feedback submission",
+        "test_suite": "Feedback API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should enforce rate limiting",
+        "test_file_path": "src/app/api/feedback/route.test.ts",
+        "test_name": "should enforce rate limiting",
+        "test_suite": "Feedback API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should validate request payload",
+        "test_file_path": "src/app/api/feedback/route.test.ts",
+        "test_name": "should validate request payload",
+        "test_suite": "Feedback API",
+        "test_scope": "unit"
+      }
+    ],
+    "Build feedback retrieval endpoints (GET /api/projects/:id/feedback)": [
+      {
+        "title": "should return project feedback",
+        "test_file_path": "src/app/api/projects/[id]/feedback/route.test.ts",
+        "test_name": "should return project feedback",
+        "test_suite": "Projects API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should require authentication", 
+        "test_file_path": "src/app/api/projects/[id]/feedback/route.test.ts",
+        "test_name": "should require authentication",
+        "test_suite": "Projects API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should paginate large result sets",
+        "test_file_path": "src/app/api/projects/[id]/feedback/route.test.ts",
+        "test_name": "should paginate large result sets",
+        "test_suite": "Projects API",
+        "test_scope": "unit"
+      }
+    ],
+    "Create analytics aggregation endpoints": [
+      {
+        "title": "should calculate average rating",
+        "test_file_path": "src/app/api/analytics/route.test.ts",
+        "test_name": "should calculate average rating",
+        "test_suite": "Analytics API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should aggregate response counts",
+        "test_file_path": "src/app/api/analytics/route.test.ts", 
+        "test_name": "should aggregate response counts",
+        "test_suite": "Analytics API",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should filter by date range",
+        "test_file_path": "src/app/api/analytics/route.test.ts",
+        "test_name": "should filter by date range",
+        "test_suite": "Analytics API",
+        "test_scope": "unit"
+      }
+    ],
+    "Add feedback filters & search": [
+      {
+        "title": "should filter by rating",
+        "test_file_path": "src/components/Feedback/FeedbackFilters.test.tsx",
+        "test_name": "should filter by rating",
+        "test_suite": "Feedback Filters",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should search feedback comments",
+        "test_file_path": "src/components/Feedback/FeedbackSearch.test.tsx",
+        "test_name": "should search feedback comments",
+        "test_suite": "Feedback Search",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should combine multiple filters",
+        "test_file_path": "src/components/Feedback/FeedbackList.test.tsx",
+        "test_name": "should combine multiple filters",
+        "test_suite": "Feedback List",
+        "test_scope": "unit"
+      }
+    ],
+    "Create shareable public feedback view": [
+      {
+        "title": "should display public feedback without auth",
+        "test_file_path": "src/app/public/[projectId]/page.test.tsx",
+        "test_name": "should display public feedback without auth",
+        "test_suite": "Public Feedback Page",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should respect privacy settings",
+        "test_file_path": "src/app/public/[projectId]/page.test.tsx",
+        "test_name": "should respect privacy settings",
+        "test_suite": "Public Feedback Page",
+        "test_scope": "unit"
+      },
+      {
+        "title": "should handle invalid project IDs",
+        "test_file_path": "src/app/public/[projectId]/page.test.tsx",
+        "test_name": "should handle invalid project IDs",
+        "test_suite": "Public Feedback Page",
+        "test_scope": "unit"
+      }
+    ]
+  },
+  "integration_tests": [
+    {
+      "title": "complete authentication flow redirects to dashboard",
+      "test_file_path": "src/__tests__/auth-flow.integration.test.tsx",
+      "test_name": "complete authentication flow redirects to dashboard",
+      "test_suite": "Authentication Integration",
+      "test_scope": "integration"
+    },
+    {
+      "title": "widget submission updates dashboard analytics",
+      "test_file_path": "src/__tests__/widget-dashboard.integration.test.tsx",
+      "test_name": "widget submission updates dashboard analytics",
+      "test_suite": "Widget Dashboard Integration",
+      "test_scope": "integration"
+    },
+    {
+      "title": "project creation enables widget embedding",
+      "test_file_path": "src/__tests__/project-widget.integration.test.tsx",
+      "test_name": "project creation enables widget embedding",
+      "test_suite": "Project Widget Integration",
+      "test_scope": "integration"
+    },
+    {
+      "title": "rate limiting blocks excessive submissions",
+      "test_file_path": "src/__tests__/rate-limiting.integration.test.tsx",
+      "test_name": "rate limiting blocks excessive submissions",
+      "test_suite": "Rate Limiting Integration",
+      "test_scope": "integration"
+    },
+    {
+      "title": "real-time updates work across browser tabs",
+      "test_file_path": "src/__tests__/realtime.integration.test.tsx",
+      "test_name": "real-time updates work across browser tabs",
+      "test_suite": "Realtime Integration",
+      "test_scope": "integration"
+    },
+    {
+      "title": "feedback data flows from widget to analytics",
+      "test_file_path": "src/__tests__/end-to-end.integration.test.tsx", 
+      "test_name": "feedback data flows from widget to analytics",
+      "test_suite": "End-to-End Integration",
+      "test_scope": "integration"
+    }
+  ]
+}
