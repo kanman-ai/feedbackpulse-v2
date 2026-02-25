@@ -81,8 +81,8 @@ export function useAnalytics(projectId: string): UseAnalyticsReturn {
         throw new Error(`Failed to fetch sessions: ${sessionsError.message}`)
       }
 
-      // Fetch all feedback submissions for this project
-      const { data: submissions, error: submissionsError } = await supabase
+      // Fetch all feedback submissions for this project with optional date filtering
+      let submissionsQuery = supabase
         .from('feedback_submissions')
         .select(`
           id,
@@ -92,7 +92,18 @@ export function useAnalytics(projectId: string): UseAnalyticsReturn {
           feedback_sessions!inner(project_id)
         `)
         .eq('feedback_sessions.project_id', projectId)
-        .order('submitted_at', { ascending: false })
+
+      // Apply date range filtering if provided
+      if (dateRange?.from) {
+        submissionsQuery = submissionsQuery.gte('submitted_at', dateRange.from.toISOString())
+      }
+      if (dateRange?.to) {
+        submissionsQuery = submissionsQuery.lte('submitted_at', dateRange.to.toISOString())
+      }
+
+      submissionsQuery = submissionsQuery.order('submitted_at', { ascending: false })
+
+      const { data: submissions, error: submissionsError } = await submissionsQuery
 
       if (submissionsError) {
         throw new Error(`Failed to fetch submissions: ${submissionsError.message}`)
@@ -145,7 +156,7 @@ export function useAnalytics(projectId: string): UseAnalyticsReturn {
     } finally {
       setLoading(false)
     }
-  }, [projectId, supabase])
+  }, [projectId, dateRange?.from, dateRange?.to, supabase])
 
   /**
    * Public method to manually refresh analytics data.
@@ -155,7 +166,7 @@ export function useAnalytics(projectId: string): UseAnalyticsReturn {
     await fetchAnalytics()
   }, [fetchAnalytics])
 
-  // Initial data fetch
+  // Initial data fetch - triggers when project or date range changes
   useEffect(() => {
     fetchAnalytics()
   }, [fetchAnalytics])

@@ -13,10 +13,12 @@
 
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Calendar } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { useAnalytics } from '@/lib/projects/use-analytics'
+import { useAnalytics, DateRangeValue } from '@/lib/projects/use-analytics'
+import { DateRangePicker, DATE_RANGE_PRESETS } from '@/components/ui/date-range-picker'
 
 interface AnalyticsDashboardProps {
   projectId: string
@@ -29,7 +31,13 @@ interface AnalyticsDashboardProps {
  * @param projectId - UUID of the project to show analytics for
  */
 export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
-  const { analytics, loading, error } = useAnalytics(projectId)
+  // State for managing selected date range filter
+  const [dateRange, setDateRange] = useState<DateRangeValue | undefined>(() => {
+    // Default to last 30 days for better initial UX
+    return DATE_RANGE_PRESETS.LAST_30_DAYS.getRange()
+  })
+  
+  const { analytics, loading, error } = useAnalytics(projectId, dateRange)
 
   if (loading) {
     return (
@@ -67,6 +75,25 @@ export function AnalyticsDashboard({ projectId }: AnalyticsDashboardProps) {
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Header with Date Filter */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Analytics Dashboard</h1>
+          <p className="text-muted-foreground">
+            Insights and metrics for your feedback data
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-muted-foreground" />
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            placeholder="Select date range"
+            className="w-[280px]"
+          />
+        </div>
+      </div>
+
       {/* Key Metrics Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <MetricCard
