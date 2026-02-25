@@ -1,48 +1,40 @@
 /**
- * FeedbackPulse Widget Component
+ * FeedbackPulse v2 - Feedback Widget Component
  * 
- * Main React component for the FeedbackPulse widget. This component renders
- * the feedback form that appears when users interact with the widget on
- * third-party websites.
+ * A React component that displays a floating feedback button and modal.
+ * When clicked, shows a form with rating stars, message textarea, optional email field,
+ * and submit functionality that sends data to the feedback API endpoint.
+ * 
+ * Features:
+ * - 1-5 star rating system
+ * - Message textarea with character limit
+ * - Optional email field for follow-up
+ * - Form validation
+ * - Success/error messaging
+ * - Form clearing after successful submission
+ * - WCAG 2.1 accessibility compliance
  */
 
 import React, { useState, useEffect } from 'react';
 import './widget.css';
 
 /**
- * Configuration passed to the widget from the bootstrap script
- */
-export interface WidgetConfig {
-  projectId: string;
-  theme: string;
-  question: string;
-  position: string;
-  baseUrl: string;
-}
-
-/**
- * Alternative configuration for direct usage (e.g., in settings preview)
- */
-export interface DirectWidgetProps {
-  projectId: string;
-  buttonText?: string;
-  themeColor?: string;
-  questionText?: string;
-  isPreview?: boolean;
-}
-
-/**
  * Props for the FeedbackWidget component
  */
-interface FeedbackWidgetProps {
-  config?: WidgetConfig;
-  onClose?: () => void;
-  // Direct props for settings panel usage
-  projectId?: string;
-  buttonText?: string;
-  themeColor?: string;
-  questionText?: string;
-  isPreview?: boolean;
+export interface FeedbackWidgetProps {
+  /** Project ID to associate the feedback with */
+  projectId: string;
+  /** API endpoint URL for submitting feedback */
+  apiUrl: string;
+  /** Optional custom theme colors */
+  theme?: {
+    primary?: string;
+    secondary?: string;
+    text?: string;
+    background?: string;
+  };
+  /** Position of the floating button */
+  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
 }
 
 /**
@@ -51,276 +43,388 @@ interface FeedbackWidgetProps {
 interface FeedbackData {
   rating: number;
   comment: string;
+  email: string;
+}
+
+/**
+ * Validation errors structure
+ */
+interface ValidationErrors {
+  rating?: string;
+  comment?: string;
   email?: string;
 }
 
 /**
- * Main FeedbackPulse widget component.
- * Renders a floating feedback button that expands into a feedback form when clicked.
+ * Star rating component with interactive hover and selection states
  * 
- * @param props - Component props containing configuration and callbacks
+ * @param rating - Current selected rating (1-5)
+ * @param onRatingChange - Callback when rating is selected
+ * @param disabled - Whether the rating is disabled during submission
  */
-export function FeedbackWidget({ 
-  config, 
-  onClose, 
-  projectId, 
-  buttonText, 
-  themeColor, 
-  questionText, 
-  isPreview 
-}: FeedbackWidgetProps) {
-  // Determine configuration source - either from config prop or direct props
-  const widgetConfig = config || {
-    projectId: projectId || '',
-    theme: themeColor || '#3b82f6',
-    question: questionText || 'How can we improve your experience?',
-    position: 'bottom-right',
-    baseUrl: typeof window !== 'undefined' ? window.location.origin : ''
+const StarRating: React.FC<{
+  rating: number;
+  onRatingChange: (rating: number) => void;
+  disabled: boolean;
+}> = ({ rating, onRatingChange, disabled }) => {
+  const [hoverRating, setHoverRating] = useState(0);
+
+  /**
+   * Handles star hover for visual feedback
+   * @param starIndex - Index of the hovered star (1-based)
+   */
+  const handleStarHover = (starIndex: number) => {
+    if (!disabled) {
+      setHoverRating(starIndex);
+    }
   };
-  
-  const displayButtonText = buttonText || 'Feedback';
-  const [isExpanded, setIsExpanded] = useState(false);
+
+  /**
+   * Handles star click to set rating
+   * @param starIndex - Index of the clicked star (1-based)
+   */
+  const handleStarClick = (starIndex: number) => {
+    if (!disabled) {
+      onRatingChange(starIndex);
+    }
+  };
+
+  return (
+    <div 
+      className="star-rating" 
+      onMouseLeave={() => setHoverRating(0)}
+      role="radiogroup"
+      aria-label="Rate your experience"
+    >
+      {[1, 2, 3, 4, 5].map((starIndex) => {
+        const isFilled = starIndex <= (hoverRating || rating);
+        return (
+          <button
+            key={starIndex}
+            type="button"
+            className={`star ${isFilled ? 'filled' : 'empty'} ${disabled ? 'disabled' : ''}`}
+            onClick={() => handleStarClick(starIndex)}
+            onMouseEnter={() => handleStarHover(starIndex)}
+            disabled={disabled}
+            role="radio"
+            aria-checked={starIndex === rating}
+            aria-label={`${starIndex} stars`}
+          >
+            ⭐
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+/**
+ * Main FeedbackWidget component that renders the floating button and modal
+ */
+export const FeedbackWidget: React.FC<FeedbackWidgetProps> = ({
+  projectId,
+  apiUrl,
+  theme = {},
+  position = 'bottom-right'
+}) => {
+  // Component state management
+  const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [feedbackData, setFeedbackData] = useState<FeedbackData>({
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [formData, setFormData] = useState<FeedbackData>({
     rating: 0,
     comment: '',
     email: ''
   });
-  const [error, setError] = useState<string>('');
+  const [errors, setErrors] = useState<ValidationErrors>({});
 
   /**
-   * Handles toggling the widget expansion state.
-   * Opens or closes the feedback form.
-   */
-  const handleToggle = () => {
-    setIsExpanded(!isExpanded);
-    setError(''); // Clear any previous errors
-  };
-
-  /**
-   * Handles rating selection by the user.
+   * Validates the feedback form data and returns any validation errors
    * 
-   * @param rating - Selected rating value (1-5)
+   * @param data - The form data to validate
+   * @returns Object containing validation errors, if any
    */
-  const handleRatingSelect = (rating: number) => {
-    setFeedbackData(prev => ({ ...prev, rating }));
-  };
+  const validateForm = (data: FeedbackData): ValidationErrors => {
+    const validationErrors: ValidationErrors = {};
 
-  /**
-   * Handles text input changes for comment and email fields.
-   * 
-   * @param field - The field being updated ('comment' or 'email')
-   * @param value - The new value for the field
-   */
-  const handleInputChange = (field: keyof FeedbackData, value: string) => {
-    setFeedbackData(prev => ({ ...prev, [field]: value }));
-  };
-
-  /**
-   * Submits the feedback to the FeedbackPulse API.
-   * Handles validation, submission, and success/error states.
-   * In preview mode, simulates submission without making API calls.
-   */
-  const handleSubmit = async () => {
-    // Validate required fields
-    if (feedbackData.rating === 0) {
-      setError('Please select a rating');
-      return;
+    // Rating validation
+    if (!data.rating || data.rating < 1 || data.rating > 5) {
+      validationErrors.rating = 'Rating is required';
     }
 
-    if (!feedbackData.comment.trim()) {
-      setError('Please provide a comment');
+    // Comment validation
+    if (!data.comment.trim()) {
+      validationErrors.comment = 'Comment is required';
+    } else if (data.comment.length > 500) {
+      validationErrors.comment = 'Comment must be 500 characters or less';
+    }
+
+    // Email validation (optional field)
+    if (data.email && !isValidEmail(data.email)) {
+      validationErrors.email = 'Please enter a valid email address';
+    }
+
+    return validationErrors;
+  };
+
+  /**
+   * Validates email format using a regex pattern
+   * 
+   * @param email - Email string to validate
+   * @returns True if email format is valid, false otherwise
+   */
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  /**
+   * Handles form submission - validates data and sends to API
+   * 
+   * @param e - Form submission event
+   */
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitError(null);
+
+    // Validate form data
+    const validationErrors = validateForm(formData);
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length > 0) {
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
 
     try {
-      // In preview mode, simulate successful submission
-      if (isPreview) {
-        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
-        setIsSubmitted(true);
-        
-        // Auto-close after 3 seconds
-        setTimeout(() => {
-          setIsExpanded(false);
-          onClose?.();
-        }, 3000);
-        return;
-      }
-
       // Submit feedback to API
-      const response = await fetch(`${widgetConfig.baseUrl}/api/feedback`, {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          project_id: widgetConfig.projectId,
-          rating: feedbackData.rating,
-          comment: feedbackData.comment,
-          email: feedbackData.email,
+          project_id: projectId,
+          rating: formData.rating,
+          comment: formData.comment.trim(),
+          email: formData.email.trim() || undefined,
           source: 'widget'
-        }),
+        })
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to submit feedback');
       }
 
-      // Success - show thank you message
-      setIsSubmitted(true);
-      
-      // Auto-close after 3 seconds
+      // Success! Show success message and reset form
+      setShowSuccess(true);
+      setFormData({ rating: 0, comment: '', email: '' });
+      setErrors({});
+
+      // Auto-close success message after 3 seconds
       setTimeout(() => {
-        setIsExpanded(false);
-        onClose?.();
+        setShowSuccess(false);
+        setIsOpen(false);
       }, 3000);
 
     } catch (error) {
       console.error('Failed to submit feedback:', error);
-      setError('Failed to submit feedback. Please try again.');
+      setSubmitError('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   /**
-   * Renders the rating selector component.
-   * Shows 5 star icons that users can click to select a rating.
+   * Handles input changes in the form fields
+   * 
+   * @param field - Field name to update
+   * @param value - New value for the field
    */
-  const renderRatingSelector = () => {
-    return (
-      <div className="fp-rating-selector">
-        <label className="fp-label">How would you rate your experience?</label>
-        <div className="fp-stars">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              className={`fp-star ${star <= feedbackData.rating ? 'active' : ''}`}
-              onClick={() => handleRatingSelect(star)}
-              aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
-            >
-              ★
-            </button>
-          ))}
-        </div>
-      </div>
-    );
+  const handleInputChange = (field: keyof FeedbackData, value: string | number) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: undefined }));
+    }
   };
 
   /**
-   * Renders the feedback form with comment and email fields.
+   * Closes the modal and resets any temporary state
    */
-  const renderFeedbackForm = () => {
-    return (
-      <div className="fp-form">
-        <textarea
-          className="fp-textarea"
-          placeholder={widgetConfig.question}
-          value={feedbackData.comment}
-          onChange={(e) => handleInputChange('comment', e.target.value)}
-          rows={3}
-          maxLength={500}
-        />
-        
-        <input
-          type="email"
-          className="fp-input"
-          placeholder="Your email (optional)"
-          value={feedbackData.email}
-          onChange={(e) => handleInputChange('email', e.target.value)}
-        />
-
-        {error && (
-          <div className="fp-error" role="alert">
-            {error}
-          </div>
-        )}
-
-        <div className="fp-actions">
-          <button
-            type="button"
-            className="fp-button fp-button-secondary"
-            onClick={handleToggle}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            className="fp-button fp-button-primary"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !feedbackData.rating || !feedbackData.comment.trim()}
-          >
-            {isSubmitting ? 'Sending...' : 'Send Feedback'}
-          </button>
-        </div>
-      </div>
-    );
+  const handleClose = () => {
+    setIsOpen(false);
+    setShowSuccess(false);
+    setSubmitError(null);
+    setErrors({});
   };
 
   /**
-   * Renders the success message after feedback submission.
+   * Handles escape key to close modal
    */
-  const renderSuccessMessage = () => {
-    return (
-      <div className="fp-success">
-        <div className="fp-success-icon">✓</div>
-        <h3 className="fp-success-title">Thank you!</h3>
-        <p className="fp-success-message">
-          Your feedback has been submitted successfully.
-        </p>
-      </div>
-    );
-  };
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen]);
 
   return (
-    <div 
-      className="fp-widget"
-      style={{ '--theme-color': widgetConfig.theme } as React.CSSProperties}
-    >
-      {/* Widget trigger button */}
+    <div className="feedback-widget">
+      {/* Floating feedback button */}
       <button
-        className={`fp-trigger ${isExpanded ? 'expanded' : ''}`}
-        onClick={handleToggle}
-        aria-label={isExpanded ? 'Close feedback form' : 'Open feedback form'}
-        style={{ backgroundColor: widgetConfig.theme }}
+        className={`feedback-button ${position}`}
+        onClick={() => setIsOpen(true)}
+        style={{
+          backgroundColor: theme.primary || '#007bff',
+          color: theme.text || '#ffffff'
+        }}
+        aria-label="Open feedback form"
+        type="button"
       >
-        {isExpanded ? '×' : displayButtonText}
+        💬 Feedback
       </button>
 
-      {/* Widget popup/panel */}
-      {isExpanded && (
-        <div className="fp-panel">
-          <div className="fp-header">
-            <h3 className="fp-title">{displayButtonText}</h3>
-            <button
-              className="fp-close"
-              onClick={handleToggle}
-              aria-label="Close feedback form"
-            >
-              ×
-            </button>
-          </div>
+      {/* Modal overlay and content */}
+      {isOpen && (
+        <div 
+          className="feedback-modal-overlay"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleClose();
+            }
+          }}
+        >
+          <div 
+            className="feedback-modal" 
+            role="dialog" 
+            aria-labelledby="feedback-title"
+            aria-modal="true"
+            style={{
+              backgroundColor: theme.background || '#ffffff',
+              color: theme.text || '#333333'
+            }}
+          >
+            {/* Modal header */}
+            <div className="feedback-modal-header">
+              <h2 id="feedback-title">Share Your Feedback</h2>
+              <button 
+                className="close-button" 
+                onClick={handleClose}
+                aria-label="Close feedback form"
+                type="button"
+              >
+                ✕
+              </button>
+            </div>
 
-          <div className="fp-content">
-            {isSubmitted ? (
-              renderSuccessMessage()
-            ) : (
-              <>
-                {renderRatingSelector()}
-                {renderFeedbackForm()}
-              </>
+            {/* Success message */}
+            {showSuccess && (
+              <div className="success-message" role="alert">
+                ✅ Thank you for your feedback! We appreciate your input.
+              </div>
+            )}
+
+            {/* Error message */}
+            {submitError && (
+              <div className="error-message" role="alert">
+                ❌ {submitError}
+              </div>
+            )}
+
+            {/* Feedback form */}
+            {!showSuccess && (
+              <form onSubmit={handleSubmit} className="feedback-form">
+                {/* Rating section */}
+                <div className="form-group">
+                  <label className="form-label">Rate your experience</label>
+                  <StarRating 
+                    rating={formData.rating}
+                    onRatingChange={(rating) => handleInputChange('rating', rating)}
+                    disabled={isSubmitting}
+                  />
+                  {errors.rating && (
+                    <span className="error-text" role="alert">{errors.rating}</span>
+                  )}
+                </div>
+
+                {/* Message section */}
+                <div className="form-group">
+                  <label htmlFor="feedback-message" className="form-label">Message</label>
+                  <textarea
+                    id="feedback-message"
+                    className={`form-input ${errors.comment ? 'error' : ''}`}
+                    value={formData.comment}
+                    onChange={(e) => handleInputChange('comment', e.target.value)}
+                    placeholder="Tell us about your experience..."
+                    maxLength={500}
+                    rows={4}
+                    disabled={isSubmitting}
+                    aria-describedby="message-error message-counter"
+                  />
+                  <div className="form-meta">
+                    <span id="message-counter" className="character-count">
+                      {formData.comment.length}/500
+                    </span>
+                  </div>
+                  {errors.comment && (
+                    <span id="message-error" className="error-text" role="alert">
+                      {errors.comment}
+                    </span>
+                  )}
+                </div>
+
+                {/* Email section */}
+                <div className="form-group">
+                  <label htmlFor="feedback-email" className="form-label">Email (optional)</label>
+                  <input
+                    type="email"
+                    id="feedback-email"
+                    className={`form-input ${errors.email ? 'error' : ''}`}
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="your@email.com"
+                    disabled={isSubmitting}
+                    aria-describedby="email-error email-help"
+                  />
+                  <span id="email-help" className="help-text">
+                    Optional: For follow-up questions only
+                  </span>
+                  {errors.email && (
+                    <span id="email-error" className="error-text" role="alert">
+                      {errors.email}
+                    </span>
+                  )}
+                </div>
+
+                {/* Submit button */}
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="submit-button"
+                    disabled={isSubmitting}
+                    style={{
+                      backgroundColor: theme.primary || '#007bff',
+                      color: theme.text || '#ffffff'
+                    }}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Feedback'}
+                  </button>
+                </div>
+              </form>
             )}
           </div>
         </div>
       )}
     </div>
   );
-}
+};
 
 export default FeedbackWidget;
