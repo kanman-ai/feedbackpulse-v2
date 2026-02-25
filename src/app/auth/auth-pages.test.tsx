@@ -40,20 +40,20 @@ describe('Auth Page Integration Tests', () => {
       error: null
     } as any)
     
-    // Mock default auth method responses
+    // Mock default auth method responses with proper type assertions
     vi.mocked(supabase.auth.signUp).mockResolvedValue({
       data: { user: null, session: null },
       error: null
-    })
+    } as any)
     vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
       data: { user: null, session: null },
       error: null
-    })
+    } as any)
     vi.mocked(supabase.auth.signOut).mockResolvedValue({ error: null })
     vi.mocked(supabase.auth.exchangeCodeForSession).mockResolvedValue({
       data: { user: null, session: null },
       error: null
-    })
+    } as any)
   })
 
   describe('auth pages should render and handle form submissions', () => {
