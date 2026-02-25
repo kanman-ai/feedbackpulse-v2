@@ -6,7 +6,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { AuthProvider } from '@/lib/auth/auth-context'
+import { Providers } from '@/lib/providers'
 
 /**
  * Inter font configuration for consistent typography.
@@ -29,10 +29,10 @@ export const metadata: Metadata = {
 /**
  * Root Layout Component.
  * Provides the base HTML structure and wraps the app with necessary providers.
- * All pages inherit this layout and have access to auth context.
+ * All pages inherit this layout and have access to auth context and React Query.
  * 
  * @param props - Component props containing child page components
- * @returns JSX element with HTML structure and auth provider
+ * @returns JSX element with HTML structure and providers
  */
 export default function RootLayout({
   children,
@@ -42,9 +42,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   )
