@@ -21,11 +21,28 @@ export interface WidgetConfig {
 }
 
 /**
+ * Alternative configuration for direct usage (e.g., in settings preview)
+ */
+export interface DirectWidgetProps {
+  projectId: string;
+  buttonText?: string;
+  themeColor?: string;
+  questionText?: string;
+  isPreview?: boolean;
+}
+
+/**
  * Props for the FeedbackWidget component
  */
 interface FeedbackWidgetProps {
-  config: WidgetConfig;
+  config?: WidgetConfig;
   onClose?: () => void;
+  // Direct props for settings panel usage
+  projectId?: string;
+  buttonText?: string;
+  themeColor?: string;
+  questionText?: string;
+  isPreview?: boolean;
 }
 
 /**
@@ -43,7 +60,25 @@ interface FeedbackData {
  * 
  * @param props - Component props containing configuration and callbacks
  */
-export function FeedbackWidget({ config, onClose }: FeedbackWidgetProps) {
+export function FeedbackWidget({ 
+  config, 
+  onClose, 
+  projectId, 
+  buttonText, 
+  themeColor, 
+  questionText, 
+  isPreview 
+}: FeedbackWidgetProps) {
+  // Determine configuration source - either from config prop or direct props
+  const widgetConfig = config || {
+    projectId: projectId || '',
+    theme: themeColor || '#3b82f6',
+    question: questionText || 'How can we improve your experience?',
+    position: 'bottom-right',
+    baseUrl: typeof window !== 'undefined' ? window.location.origin : ''
+  };
+  
+  const displayButtonText = buttonText || 'Feedback';
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -85,6 +120,7 @@ export function FeedbackWidget({ config, onClose }: FeedbackWidgetProps) {
   /**
    * Submits the feedback to the FeedbackPulse API.
    * Handles validation, submission, and success/error states.
+   * In preview mode, simulates submission without making API calls.
    */
   const handleSubmit = async () => {
     // Validate required fields
@@ -102,14 +138,27 @@ export function FeedbackWidget({ config, onClose }: FeedbackWidgetProps) {
     setError('');
 
     try {
+      // In preview mode, simulate successful submission
+      if (isPreview) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+        setIsSubmitted(true);
+        
+        // Auto-close after 3 seconds
+        setTimeout(() => {
+          setIsExpanded(false);
+          onClose?.();
+        }, 3000);
+        return;
+      }
+
       // Submit feedback to API
-      const response = await fetch(`${config.baseUrl}/api/feedback`, {
+      const response = await fetch(`${widgetConfig.baseUrl}/api/feedback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          project_id: config.projectId,
+          project_id: widgetConfig.projectId,
           rating: feedbackData.rating,
           comment: feedbackData.comment,
           email: feedbackData.email,
@@ -171,7 +220,7 @@ export function FeedbackWidget({ config, onClose }: FeedbackWidgetProps) {
       <div className="fp-form">
         <textarea
           className="fp-textarea"
-          placeholder={config.question}
+          placeholder={widgetConfig.question}
           value={feedbackData.comment}
           onChange={(e) => handleInputChange('comment', e.target.value)}
           rows={3}
@@ -232,23 +281,23 @@ export function FeedbackWidget({ config, onClose }: FeedbackWidgetProps) {
   return (
     <div 
       className="fp-widget"
-      style={{ '--theme-color': config.theme } as React.CSSProperties}
+      style={{ '--theme-color': widgetConfig.theme } as React.CSSProperties}
     >
       {/* Widget trigger button */}
       <button
         className={`fp-trigger ${isExpanded ? 'expanded' : ''}`}
         onClick={handleToggle}
         aria-label={isExpanded ? 'Close feedback form' : 'Open feedback form'}
-        style={{ backgroundColor: config.theme }}
+        style={{ backgroundColor: widgetConfig.theme }}
       >
-        {isExpanded ? '×' : '?'}
+        {isExpanded ? '×' : displayButtonText}
       </button>
 
       {/* Widget popup/panel */}
       {isExpanded && (
         <div className="fp-panel">
           <div className="fp-header">
-            <h3 className="fp-title">Feedback</h3>
+            <h3 className="fp-title">{displayButtonText}</h3>
             <button
               className="fp-close"
               onClick={handleToggle}
