@@ -4,6 +4,17 @@
  */
 
 import '@testing-library/jest-dom'
+import React from 'react'
+
+// Mock environment variables for Supabase
+process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
+process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
+
+// Set NODE_ENV to test to enable React development mode
+process.env.NODE_ENV = 'test'
+
+// Make React globally available for JSX
+global.React = React
 
 // Mock Next.js router globally
 Object.defineProperty(window, 'location', {

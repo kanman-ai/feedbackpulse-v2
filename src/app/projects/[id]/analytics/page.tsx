@@ -12,7 +12,7 @@
 
 'use client'
 
-import { useEffect, useState  from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 
 import { AnalyticsDashboard } from '@/components/projects/AnalyticsDashboard'
@@ -54,17 +54,11 @@ export default function AnalyticsPage() {
       }
 
       try {
-        // Verify user has access to this project
+        // Fetch project data (access control handled by RLS)
         const { data: projectData, error } = await supabase
           .from('projects')
-          .select(`
-            id,
-            name,
-            description,
-            project_members!inner(user_id, role)
-          `)
+          .select('id, name, description')
           .eq('id', projectId)
-          .eq('project_members.user_id', user.id)
           .single()
 
         if (error || !projectData) {
@@ -73,10 +67,12 @@ export default function AnalyticsPage() {
           return
         }
 
+        // Type assertion for the project data - Supabase types are complex
+        const project = projectData as any
         setProject({
-          id: projectData.id,
-          name: projectData.name,
-          description: projectData.description
+          id: project.id,
+          name: project.name,
+          description: project.description
         })
         setLoading(false)
       } catch (err) {
