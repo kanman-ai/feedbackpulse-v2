@@ -57,6 +57,7 @@ export interface Database {
         Row: {
           id: string
           name: string
+          slug: string
           description: string | null
           owner_id: string
           website_url: string | null
@@ -68,6 +69,7 @@ export interface Database {
         Insert: {
           id?: string
           name: string
+          slug: string
           description?: string | null
           owner_id: string
           website_url?: string | null
@@ -79,6 +81,7 @@ export interface Database {
         Update: {
           id?: string
           name?: string
+          slug?: string
           description?: string | null
           owner_id?: string
           website_url?: string | null
