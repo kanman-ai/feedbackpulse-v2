@@ -1,17 +1,15 @@
 /**
- * Utility functions for common operations across the application.
+ * Utility functions for FeedbackPulse v2.
+ * Common helper functions used across components and services.
  */
 
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { type ClassValue, clsx } from "clsx"
+import { twMerge } from "tailwind-merge"
 
 /**
- * Combines and merges class names using clsx and tailwind-merge.
- * Useful for conditionally applying CSS classes and resolving Tailwind conflicts.
- * 
- * @param inputs - Class values to combine (strings, objects, arrays, etc.)
- * @returns Merged class string with conflicts resolved
+ * Utility function to merge Tailwind CSS classes.
+ * Combines clsx for conditional classes and twMerge for deduplication.
  */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  return twMerge(clsx(inputs))
 }
