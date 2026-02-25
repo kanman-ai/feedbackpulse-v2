@@ -7,6 +7,14 @@
 
 import { beforeAll, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom';
+import React from 'react';
+
+// Make React globally available for JSX
+global.React = React;
+
+// Enable React development mode for tests
+process.env.NODE_ENV = 'development';
 
 // Automatically cleanup React components after each test
 afterEach(() => {
